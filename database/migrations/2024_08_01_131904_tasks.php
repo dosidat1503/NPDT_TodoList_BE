@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('NOTE')->nullable();
             $table->string('DUEDATE')->nullable(); 
             $table->boolean('ISCOMPLETE')->default(false);
+            $table->timestamps();
         });
     }
 

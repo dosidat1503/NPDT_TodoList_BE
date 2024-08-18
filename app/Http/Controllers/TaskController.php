@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {
-    public function saveTask(Request $request)
+    public function addTask(Request $request)
     {
         $taskName = $request->input('taskName');
         $note = $request->input('note');
@@ -19,7 +19,8 @@ class TaskController extends Controller
             'NAME' => $taskName,
             'NOTE' => $note,
             'DUEDATE' => $isChangeDate ? $dueDate : null,
-            'ISCOMPLETE' => false
+            'ISCOMPLETE' => false,
+            'created_at' => now(), 
         ]);
 
         Log::info('Task saved successfully');
@@ -27,8 +28,8 @@ class TaskController extends Controller
         return response()->json(['message' => 'Task saved successfully'], 200);
     }
 
-    public function getTasks(){
-        $tasks = DB::table('tasks')->get();
+    public function getTasks(Request $request){ 
+        $tasks = DB::table('tasks')->orderBy('created_at', 'desc')->paginate(10);
         return response()->json($tasks);
     }
 
@@ -37,14 +38,19 @@ class TaskController extends Controller
         $taskName = $request->input('taskName');
         $note = $request->input('note');
         $dueDate = $request->input('dueDate');
+        $isChangeDate = $request->input('isChangeDate');
 
-        DB::table('tasks')->where('TASK_ID', $taskID)->update([
+        $updateData = [
             'NAME' => $taskName,
             'NOTE' => $note,
-            'DUEDATE' => $dueDate
-        ]);
+        ];
+        
+        if ($isChangeDate) {
+            $updateData['DUEDATE'] = $dueDate;
+        }
 
-        Log::info('Task updated successfully', ['taskID' => $taskID]);
+        DB::table('tasks')->where('TASK_ID', $taskID)->update($updateData);
+        Log::info('Task updated successfully', ['taskID' => $updateData]);
 
         return response()->json(['message' => 'Task updated successfully'], 200);
     }
@@ -70,5 +76,17 @@ class TaskController extends Controller
         Log::info('Task deleted successfully', ['taskID' => $taskID]);
 
         return response()->json(['message' => 'Task deleted successfully'], 200);
+    }
+
+    public function getTask($id){ 
+        $task = DB::table('tasks')->where('TASK_ID', $id)->first(); 
+        return response()->json($task);
+    }
+
+    public function searchTask(Request $request){
+        $query = $request->input('query');
+
+        $tasks = DB::table('tasks')->where('NAME', 'like', '%'.$query.'%')->get();
+        return response()->json($tasks);
     }
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\AuthController;  
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,5 @@ Route::get('/', function () {
 });
 Route::post('/saveTask', [TaskController::class, 'saveTask']);
 Route::get('/getTasks', [TaskController::class, 'getTasks']);
+Route::get('/getTask/{id}', [TaskController::class, 'getTask']);
+ 
